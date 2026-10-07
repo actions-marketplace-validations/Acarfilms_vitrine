@@ -1,8 +1,10 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { loadConfig, normalize } from '../src/config.js';
+import { formatNumber, LANGUAGES } from '../src/language.js';
 import { renderCards } from '../src/render/index.js';
 import { WALLPAPERS } from '../src/render/wallpaper.js';
+import { icon } from '../src/render/icons.js';
 import { snippet } from '../src/snippet.js';
 
 const stats = {
@@ -46,6 +48,21 @@ test('every wallpaper renders', () => {
   }
 });
 
+test('mail symbols render in hero widgets and link buttons', () => {
+  const config = normalize({
+    hero: { name: 'Ada', widgets: [{ icon: 'mail', label: 'Email', value: 'ada@example.com' }] },
+    links: [{ icon: 'mail', label: 'Email', url: 'https://example.com/contact' }],
+  });
+  const cards = renderCards(config);
+  assert.deepEqual(cards.map(({ file }) => file), ['hero.svg', 'link-email.svg']);
+  const symbol = icon('mail', { x: 0, y: 0, color: '#FFFFFF' });
+  for (const { file, svg } of cards) {
+    assert.ok(svg.includes(symbol.slice(symbol.indexOf('>') + 1, -4)), file);
+    assert.doesNotMatch(svg, /NaN|undefined|\[object/, file);
+  }
+  assert.match(symbol, /stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/);
+});
+
 test('long text is cut to fit instead of spilling out', () => {
   const long = 'An extraordinarily long piece of text that no card has room for';
   const config = normalize({
@@ -67,4 +84,47 @@ test('the snippet pairs light and dark files and escapes alt text', () => {
   assert.match(markup, /srcset="assets\/cards\/specs-dark.svg"/);
   assert.match(markup, /<img src="assets\/cards\/specs-light.svg"/);
   assert.match(markup, /<a href="https:\/\/github.com\/ada"><img src="assets\/cards\/link-github.svg" alt="GitHub"><\/a>/);
+});
+
+test('the snippet escapes mailto attributes without changing URI encoding', () => {
+  const config = normalize({
+    links: [{ icon: 'globe', label: 'Email', url: 'mailto:ada@example.com?subject=Hello%20Ada&body="<Hi>"' }],
+  });
+  const markup = snippet(config, 'cards', { activity: false });
+  assert.ok(markup.includes('<a href="mailto:ada@example.com?subject=Hello%20Ada&amp;body=&quot;&lt;Hi&gt;&quot;"><img src="cards/link-email.svg" alt="Email"></a>'));
+});
+
+test('the activity card speaks the configured language', () => {
+  const config = normalize({ language: 'es', activity: true });
+  const [card] = renderCards(config, { stats: { ...stats, total: 12_345, currentStreak: 1 } });
+
+  for (const words of ['Actividad', 'Últimos 12 meses', 'Contribuciones', 'Días activos', 'Racha más larga', '12.345', 'media ', '>Ene<']) {
+    assert.ok(card.svg.includes(words), `missing "${words}"`);
+  }
+  assert.match(card.svg, />1<tspan[^>]*>día</, 'one day is singular');
+  assert.doesNotMatch(card.svg, /Contributions|Last 12 months|avg /);
+});
+
+test('every language has every word', () => {
+  const shape = (value) => (typeof value === 'object' && !Array.isArray(value)
+    ? Object.fromEntries(Object.entries(value).map(([key, inner]) => [key, shape(inner)]))
+    : typeof value);
+  for (const [code, words] of Object.entries(LANGUAGES)) {
+    assert.deepEqual(shape(words), shape(LANGUAGES.en), code);
+    assert.equal(words.activity.months.length, 12, code);
+
+    const [card] = renderCards(normalize({ language: code, activity: true }), { stats });
+    assert.doesNotMatch(card.svg, /NaN|undefined|\[object/, code);
+  }
+});
+
+test('numbers are grouped with characters the embedded font has', () => {
+  assert.equal(formatNumber(12_345, 'en'), '12,345');
+  assert.equal(formatNumber(12_345, 'de'), '12.345');
+  assert.equal(formatNumber(12_345, 'fr'), '12 345');
+});
+
+test('the activity alt text follows the language', () => {
+  const config = normalize({ language: 'fr', activity: true });
+  assert.match(snippet(config, 'vitrine', { activity: true }), /alt="Activité: contributions, jours actifs et séries des 12 derniers mois."/);
 });

@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.1.1 (2026-10-07)
+
+- The action no longer fails when the branch gets a new commit while it runs, for example when GitHub starts two runs for the same push. It puts its cards on top of the new commits and pushes again.
+
+## 1.1.0 (2026-10-07)
+
+- The CLI supports `--version` (or `-v`) to print the package version and exit.
+- Link buttons accept `mailto:` URLs for email links.
+- Hero widgets and link buttons can use the `mail` symbol.
+- A `language` option translates the activity card and the default card titles into Spanish, French, German or Portuguese, and formats numbers the local way.
+
 ## 1.0.1 (2026-10-02)
 
 - The action is listed as "Vitrine Profile Cards", since GitHub Marketplace names can't match an existing GitHub account.
