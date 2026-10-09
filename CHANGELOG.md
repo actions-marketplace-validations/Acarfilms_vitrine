@@ -1,8 +1,9 @@
 # Changelog
 
-## Unreleased
+## 1.2.0 (2026-10-08)
 
-- Added `red`, `yellow` and `mint` accent colors.
+- A featured card shows one of your repositories the way GitHub lists it: name, description, main language, stars and forks. It links to the repository from the README.
+- Three more accents: `red`, `yellow` and `mint`.
 
 ## 1.1.1 (2026-10-07)
 
