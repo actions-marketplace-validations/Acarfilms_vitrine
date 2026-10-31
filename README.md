@@ -2,7 +2,7 @@
 
 Vitrine turns one YAML file into the cards on your GitHub profile: a glass hero with your name, a bento of what you do, a featured repository, a tech specs table, a year of activity and a button for each of your links. A GitHub Action renders them as SVG files in your own repository, so nothing depends on a hosted card service.
 
-The expertise, featured, specs and activity cards come in light and dark versions and follow GitHub's theme. The hero and the link buttons carry their own wallpaper and look the same in both.
+The expertise, featured, specs and activity cards come in light and dark versions and follow GitHub's theme. The hero and the link buttons carry their own wallpaper and look the same in both. Try them live in the [web playground](https://acarfilms.github.io/vitrine/).
 
 ## What it looks like
 
@@ -247,7 +247,7 @@ The text is set in [Inter](https://rsms.me/inter/), embedded in each file as a W
 
 **Can I change the order of the cards?** Yes. Each card is a separate image, so you can move its block anywhere in your README or leave it out.
 
-**Does it work for organizations?** Yes, except for the activity card, which reads a person's contribution calendar and stops the run with an error on an organization. An organization's profile README lives at `profile/README.md` in its `.github` repository, so set `readme: profile/README.md` and an `output` such as `profile/vitrine` to get the right image paths.
+**Does it work for organizations?** Yes. For an organization, the activity card shows public commits, releases, members and merged pull requests over the last 12 months. An organization's profile README lives at `profile/README.md` in its `.github` repository, so set `readme: profile/README.md` and an `output` such as `profile/vitrine` to get the right image paths.
 
 **How do the cards look on a phone?** They scale down with the page. The text is part of the image, so it gets smaller on narrow screens instead of reflowing.
 
